@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+</head>
+<body>
+<svg width="1280" height="13500">
+    <g id="hp"></g>
+    <g id="healthSymbol"></g>
+    <g id="attack"></g>
+    <g id="attackSymbol"></g>
+    <g id="defense"></g>
+    <g id="defenseSymbol"></g>
+    <g id="speed"></g>
+    <g id="speedSymbol"></g>
+    <g id="pokemonName"></g>
+    <g id="firstType"></g>
+    <g id="secondType"></g>
+    <g id="firstTypeSymbol"></g>
+    <g id="secondTypeSymbol"></g>
+    <g id="legendText"></g>
+    <g id="hpLegendSymbol"></g>
+    <g id="hpLegendText"></g>
+    <g id="attackLegendSymbol"></g>
+    <g id="attackLegendText"></g>
+    <g id="defenseLegendSymbol"></g>
+    <g id="defenseLegendText"></g>
+    <g id="speedLegendSymbol"></g>
+    <g id="speedLegendText"></g>
+    <g id="hpText"></g>
+    <g id="attackText"></g>
+    <g id="defenseText"></g>
+    <g id="speedText"></g>
+    <g id="interactionText"></g>
+    <g id="interactionStep1Text"></g>
+    <g id="interactionStep1_1Text"></g>
+    <g id="interactionStep2Text"></g>
+
+
+
+
+
+</svg>
+</body>
+<script>
+    var data = d3.csv("Pokemon.csv")
+        .then(showData)
+    function showData(pokemon){
+        var isClicked = false
+        var maxHP = d3.max(pokemon, hp => hp.HP)
+        var scaleHP = d3.scaleLinear()
+            .domain([0,maxHP])
+            .range([0,40])
+        var i = 0
+        var j = 100
+        var counterX = 0
+        var counterY = 0
+        var scaleY = d3.scaleBand()
+            .domain(pokemon.map(name => name.Name))
+            .range([0,300])
+        var svg = d3.select("svg")
+            .selectAll("image")
+            .data(pokemon).enter()
+            .append("image")
+            .attr("xlink:href", pic => pic.Picture)
+            .attr("width", 200)
+            .attr("height", 200)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 330
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 0
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+
+
+
+            //.attr("y", name => scaleY(name.Name) * 120)
+
+        i = 0
+        j = 0
+        counterX = 0
+        counterY = 0
+        var healthSymbol = d3.select("#healthSymbol")
+            .selectAll("image")
+            .data(pokemon).enter()
+            .append("image")
+            .attr("xlink:href", "data:image/png;base64,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")
+            //.attr("x", 200)
+            .attr("width", 50)
+            .attr("height", 50)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 0
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+
+        i = 50
+        j = 15
+        counterX = 0
+        counterY = 0
+        var hp = d3.select("#hp")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", health => scaleHP(health.HP))
+            .attr("fill", "red")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 50
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+           /** .on("click", function(pokemon){
+                if(!this.isClicked){
+                    var hpText = d3.select("#hp")
+                        .selectAll("text")
+                        .data(pokemon).enter()
+                        .append("text")
+                        .attr("height", 20)
+                        .attr("width", 55)
+                        .attr("x", 0)
+                        .attr("y", 0)
+                        .attr("fill", "black")
+                        .text(hpStat => hpStat.HP)
+                   // this.style.fill = "blue"
+                    this.isClicked = true
+                }
+                else{
+                    //this.style.fill = "red"
+                    this.isClicked = false
+                }
+            })
+            */
+            
+
+        i = 0
+        j = 50
+        counterX = 0
+        counterY = 0
+        var attackSymbol = d3.select("#attackSymbol")
+            .selectAll("image")
+            .data(pokemon).enter()
+            .append("image")
+            .attr("xlin:href", "Sword.png")
+            .attr("x", 200)
+            .attr("width", 50)
+            .attr("height", 50)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 0
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+        var maxAttack = d3.max(pokemon, attack => attack.Attack)
+        var scaleAttack = d3.scaleLinear()
+            .domain([0,maxAttack])
+            .range([0,40])
+        i = 50
+        j = 65
+        counterX = 0
+        counterY = 0
+        var attack = d3.select("#attack")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", attackPower => scaleAttack(attackPower.Attack))
+            .attr("fill", "#3399FF")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 50
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+        i = 115
+        j = 0
+        counterX = 0
+        counterY = 0
+        var defenseSymbol = d3.select("#defenseSymbol")
+            .selectAll("image")
+            .data(pokemon).enter()
+            .append("image")
+            .attr("xlink:href","data:image/png;base64,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")
+            .attr("x", 200)
+            .attr("width", 50)
+            .attr("height", 50)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 115
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+
+        var maxDefense = d3.max(pokemon, defense => defense.Defense)
+        var scaleDefense = d3.scaleLinear()
+            .domain([0,maxDefense])
+            .range([0,40])
+        i = 165
+        j = 15
+        counterX = 0
+        counterY = 0
+        var defense = d3.select("#defense")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", defensePower => scaleDefense(defensePower.Defense))
+            .attr("fill", "#8123B0")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 165
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+
+        i = 105
+        j = 52
+        counterX = 0
+        counterY = 0
+        var speedSymbol = d3.select("#speedSymbol")
+            .selectAll("image")
+            .data(pokemon).enter()
+            .append("image")
+            .attr("xlink:href","data:image/png;base64,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")
+            .attr("width", 60)
+            .attr("height", 60)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 105
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+        var maxSpeed = d3.max(pokemon, speed => speed.Speed)
+        var scaleSpeed = d3.scaleLinear()
+            .domain([0,maxSpeed])
+            .range([0,40])
+        i = 165
+        j = 65
+        counterX = 0
+        counterY = 0
+        var speed = d3.select("#speed")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", speedStat => scaleSpeed(speedStat.Speed))
+            .attr("fill", "#FF00FF")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 165
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+        i = 50
+        j = 305
+        counterX = 0
+        counterY = 0
+        var pokemonName = d3.select("#pokemonName")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("height", 220)
+            .attr("width", 50)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 50
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+
+            .text(pokeName => pokeName.Name)
+
+        i = 50
+        j = 310
+        counterX = 0
+        counterY = 0
+        var firstTypeSymbol = d3.select("#firstTypeSymbol")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", 59)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 50
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .attr("fill", function(pokemon) {
+                if(pokemon.Type1 == "Grass") {return "#66CC00"}
+                if(pokemon.Type1 == "Fire") {return "#FF8000"}
+                if(pokemon.Type1 == "Water") {return "#007FFF"}
+                if(pokemon.Type1 == "Bug") {return "#4D9900"}
+                if(pokemon.Type1 == "Normal") {return "#808080"}
+                if(pokemon.Type1 == "Poison") {return "#7f00ff"}
+                if(pokemon.Type1 == "Electric") {return "#FFFF00"}
+                if(pokemon.Type1 == "Ground") {return "#B5B500"}
+                if(pokemon.Type1 == "Fairy") {return "#FF99CC"}
+                if(pokemon.Type1 == "Fighting") {return "#CC6600"}
+                if(pokemon.Type1 == "Psychic") {return "#F030F0"}
+                if(pokemon.Type1 == "Rock") {return "#994C00"}
+                if(pokemon.Type1 == "Ghost") {return "#4C0099"}
+                if(pokemon.Type1 == "Dark") {return "#666666"}
+                if(pokemon.Type1 == "Ice") {return "#00FFFF"}
+                if(pokemon.Type1 == "Dragon") {return "#990000"}
+                if(pokemon.Type1 == "Steel") {return "#7EA6E0"}
+                if(pokemon.Type1 == "Flying") {return "#006666"}
+            })
+        i = 52
+        j = 325
+        counterX = 0
+        counterY = 0
+        var firstType = d3.select("#firstTypeSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 52
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .attr("fill", function(pokemon){
+                if(pokemon.Type1 == "Electric") {return "black"}
+                if(pokemon.Type1 == "Ice") {return "black"}
+                else{return "white"}
+            })
+            .text(pokeType1 => pokeType1.Type1)
+
+        i = 110
+        j = 310
+        counterX = 0
+        counterY = 0
+        var secondTypeSymbol = d3.select("#secondTypeSymbol")
+            .selectAll("rect")
+            .data(pokemon).enter()
+            .append("rect")
+            .attr("height", 20)
+            .attr("width", 59)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 110
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .attr("fill", function(pokemon) {
+                if(pokemon.Type2 == "Grass") {return "#66CC00"}
+                if(pokemon.Type2 == "Fire") {return "#FF8000"}
+                if(pokemon.Type2 == "Water") {return "#007FFF"}
+                if(pokemon.Type2 == "Bug") {return "#4D9900"}
+                if(pokemon.Type2 == "Normal") {return "#808080"}
+                if(pokemon.Type2 == "Poison") {return "#7F00FF"}
+                if(pokemon.Type2 == "Electric") {return "#FFFF00"}
+                if(pokemon.Type2 == "Ground") {return "#B5B500"}
+                if(pokemon.Type2 == "Fairy") {return "#FF99CC"}
+                if(pokemon.Type2 == "Fighting") {return "#CC6600"}
+                if(pokemon.Type2 == "Psychic") {return "#F030F0"}
+                if(pokemon.Type2 == "Rock") {return "#994C00"}
+                if(pokemon.Type2 == "Ghost") {return "#4C0099"}
+                if(pokemon.Type2 == "Dark") {return "#666666"}
+                if(pokemon.Type2 == "Ice") {return "#00FFFF"}
+                if(pokemon.Type2 == "Dragon") {return "#990000"}
+                if(pokemon.Type2 == "Steel") {return "#7EA6E0"}
+                if(pokemon.Type2 == "Flying") {return "#006666"}
+                else {return "white"}
+            })
+        i = 110
+        j = 325
+        counterX = 0
+        counterY = 0
+        var secondType = d3.select("#secondTypeSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 110
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .attr("fill", function(pokemon){
+                if(pokemon.Type2 == "Electric") {return "black"}
+                if(pokemon.Type2 == "Ice") {return "black"}
+                else{return "white"}
+            })
+            .text(pokeType2 => pokeType2.Type2)
+
+        i = 15
+        j = 28
+        counterX = 0
+        counterY = 0
+        var hpClicked = false
+        var hpText = d3.select("#healthSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("width", 50)
+            .attr("height", 50)
+            .style("opacity", 0)
+            .attr("fill", "white")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 15
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .text(showHp => showHp.HP)
+            .on("click", function(pokemon){
+                if(!this.hpClicked){
+                    this.style.opacity = 1
+                    this.hpClicked = true
+                }
+                else{
+                    this.style.opacity = 0
+                    this.hpClicked = false
+
+                }
+            })
+
+        i = 15
+        j = 78
+        counterX = 0
+        counterY = 0
+        var attackClicked = false
+        var attackText = d3.select("#attackSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            //.attr("xlink:href", "data:image/png;base64,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")
+            //.attr("x", 200)
+            .attr("width", 50)
+            .attr("height", 50)
+            .style("opacity", 0)
+            .attr("fill", "white")
+            //.attr("font-weight", 700)
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 15
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .text(showAttack => showAttack.Attack)
+            .on("click", function(pokemon){
+                if(!this.attackClicked){
+                    this.style.opacity = 1
+                    this.attackClicked = true
+                }
+                else{
+                    this.style.opacity = 0
+                    this.attackClicked = false
+
+                }
+            })
+
+        i = 130
+        j = 28
+        counterX = 0
+        counterY = 0
+        var defenseClicked = false
+        var defenseText = d3.select("#defenseSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("width", 50)
+            .attr("height", 50)
+            .style("opacity", 0)
+            .attr("fill", "white")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 130
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .text(showDefense => showDefense.Defense)
+            .on("click", function(pokemon){
+                if(!this.defenseClicked){
+                    this.style.opacity = 1
+                    this.defenseClicked = true
+                }
+                else{
+                    this.style.opacity = 0
+                    this.defenseClicked = false
+
+                }
+            })
+
+        i = 122
+        j = 78
+        counterX = 0
+        counterY = 0
+        var speedClicked = false
+        var speedText = d3.select("#speedSymbol")
+            .selectAll("text")
+            .data(pokemon).enter()
+            .append("text")
+            .attr("width", 50)
+            .attr("height", 50)
+            .style("opacity", 0)
+            .attr("font-size", 16)
+            .attr("fill", "white")
+            .attr("x", function(pokemon){
+                if(counterX < 3) {
+
+                    i = i + 320
+                    counterX = counterX + 1
+                    return i
+                }
+
+                else{
+                    counterX = 0
+                    i = 122
+                    return i
+                }
+            })
+            .attr("y", function(pokemon){
+                if(counterY < 3) {
+                    counterY = counterY + 1
+                    return j
+                }
+                else{
+                    j = j + 350
+                    counterY = 0
+                    return j
+                }
+            })
+            .text(showSpeed => showSpeed.Speed)
+            .on("click", function(pokemon){
+                if(!this.speedClicked){
+                    this.style.opacity = 1
+                    this.speedClicked = true
+                }
+                else{
+                    this.style.opacity = 0
+                    this.speedClicked = false
+
+                }
+            })
+
+
+
+        var legendText = d3.select("#legendText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 90)
+            .attr("y", 20)
+            .attr("fill", "black")
+            .text("Legend")
+
+        var hpLegendSymbol = d3.select("#hpLegendSymbol")
+            .append("image")
+            .attr("xlink:href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAilBMVEX/////Bwf/AAD//Pz/6en/rKz/tLT/YmL/7u7/v7//+fn/4uL/a2v/kpL/qKj/hYX/dnb/ysr/UlL/0dH/3d3/NDT/l5f/Jyf/ICD/sLD/Xl7/fn7/Q0P/mZn/1NT/9PT/TU3/oqL/xsb/QED/ubn/goL/i4v/Nzf/UFD/aGj/eHj/WFj/SEj/EhLdYjqsAAAGhklEQVR4nO2diV4iMQyHJdwiXoCg64qKi7uo7/96OxwK4jS9krbpr98DTPKHmR5Jmp6cFAqFQqFQKBQKhUKhUCgUxNNrDcbjQasn14CScWfZncABi7ObfovQQKt/c7Y4NDDpLjtjQgMYo+H71mhjz86N7vmAwEDrvAsKC/fDKwIDKP1/R5YbR15Mh34iB8OpxsK/PpGWGsYrxPjeh0m76Wig2Z6YGIAVz/vaX+iM7324cBkbehdaeV8WFvR/5MvM0PpO4+Xc0sB8Zapva2H2QqpvNLWwvnNhafOuNpf2BqYjMn3zrq35rQsdYwsdNwN3ti+KglsX8xsP3s0+x96js4VbAn2nb47mjT1w/QU3Bq5PfQU+uJvfuHCntXDnZwAe/AS2/QRWHnzgK4DBh68BaPsIvPA0v/EAm7r6vr/g2sKFu8Azf/NrD34rDfymMXDmKtDvCznw4I/CwB8qA/qvnVWg8kemeUU2BpwkXpLZV0ikE1gZuLQXOCS0X+sB5S9YGRjaCuyT2q8Z8AiG6e8GLHcbA4JR/MiD828GzsmfD3Zb7xm1A5ULhwGIK4bnz2wE0n4jOw9gH6pqkb8iDbvRhuEXbnz7kRlekcbRW4LTYHFgP2dQzhOHz2+YClzyOFC5sN0Td9ievzQT2OJyoPoU11viHsdHuDNgFpXusjnQgPfq+e+Mz++aCBzzOVC50K62nJzPN4mk0i246zwAloli/3yDP3HA6cAmlMr7fP2X+IvXA27gl05gk/k35gZAF4i+lS2wkqgLYN6LV3iPC+xJF1hJxAPt5Nu28Gjip38zUHiNCWzKF1hJxEZTno1hYNBt4k0WCm8QhW9ZKHxDFApf0GwBUAvMYDZcg8yIo0wUqksY2AIoYUFKJGhzFdFAchjC94afIHtE1gBGOJBs4mMmCv8qFS4yUbhQKpxmonCqVMiTMAkOkmfLX2H+b+kkE4UTpcJcxlJ1uC2X+fBRqfA6E4XqWBRj5jAkSAKKowQjAkhRBlsCPyxIOj///SFrAjocSFyfulwvEkgRXy6RKHX5PnMOPxRILj+LxAyemvE9/JAE8KEWKD/HvWZTeKVilYXCFaLwKQuFT4jC5ywUYhnSLJJPeDFGBglELH14kkUSGE0BUx0miwpyVG5NBitTJD+6/RBjO+gN/hmyFmGHAV3RZPEhaj5D5jr2EOhr2ZnOy4TC4NwM9bnAwBgc7H4QrtCgAYHoXTC6+/1EdNDU6Dgw38GuAJgd7RKcgcIroL8QvA2GZyOFcgsWjA87iz03Y95ySOhOX7O7P0TouZKjpgb5/YkWf6HQYmGL7mknImuHkDqhOgSuv22bfjG1PeDDulnUqbDBBsC6NZ2wwcZumNkiKvytCXTXMxf0ngI4dcEUVHti2yTqEzFlbi69zLYIqYpGqp518HbpoAIMu9LUImK7b7qxr0dA4M2+2953ki8bNmsrhPGatkR49RWY+ALVYTn6k5QHVK9hdM84WYnejaA/SbaXhEUbQQ2JrlCB8PKAJGPEJC3nv0gwgmoTHTUhubpMtMbSicT+Rep/MDmJHAKTOlHjd1uAmmTCby6BNTMobjLwB79twZOrBCQC3UqmDs8rS0gEEq1FVdA3a7cVSHG1G0ovas0UfAS4KXAeMcYIU6IbnjREOx2l69xJR6TwlH/QyZwoDaX0LYIpiVAOri3gJuYl8KwBlBt6M0ZBJYLunAgHIef+APN8HfNgRTehpsGfBOo6jPRfYydIltg9w0tBgFkj9CxxDPesEWGWOIZ3x8i+GzShxbidggbldebOnLIlUeGVIDtIAlPfU9eLGzlgOfCmvPoyCuf0d+3xhLXdeSaWCH5VMhzQLsTB6OKmwFBGqOIttXHITrprT5xHg2ghHnepjUNyPwZ6P0V0Ot7jDfClzmjwDd9ECcjY4VckRlTGxYtP+CbVWeIY56PSMQMydjjOGu733IfHqXjat5w5LLfW4w3QlqnxY1vTwFx/wIFd3W2SewkdNgn/IOl5eswjVDBJJeJki+HEKGca/InRaWJJ0+BPDLq8m16Inira2mL6Wt/Q4KmbBBIv/mBzv8B5vg713C9ynq+jpejjl0hmiYJ5bV8mmMnY7hrRrFnewER3C7osflxDhFzoI5SjesaQdYah+BbaSDms7c7BCk76Sk3FV/FN7BIZPnZHp1LL7lKySWuknpjw4xlYz/SkwCiPtTZGXguZQqFQKBQKhUKhUCgUCoWCMf8Bnv6MSSGNEEgAAAAASUVORK5CYII=")
+            .attr("x", 0)
+            .attr("y", 50)
+            .attr("width", 50)
+            .attr("height", 50)
+
+        var hpLegendText = d3.select("#hpLegendText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 50)
+            .attr("y", 80)
+            .attr("fill", "black")
+            .text("Health")
+
+        var attackLegendSymbol = d3.select("#hpLegendSymbol")
+            .append("image")
+            .attr("xlink:href", "Sword.png")
+            .attr("x", 0)
+            .attr("y", 110)
+            .attr("width", 50)
+            .attr("height", 50)
+
+        var attackLegendText = d3.select("#attackLegendText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 50)
+            .attr("y", 140)
+            .attr("fill", "black")
+            .text("Attack")
+
+        var defenseLegendSymbol = d3.select("#defenseLegendSymbol")
+            .append("image")
+            .attr("xlink:href","data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAwFBMVEWAAID///99AH16AHqBAIH+/P78+PyFAIX58/mHAIf69fr06PT16/V3AHfw4/Dt3e2QLZCfS5/Kn8rWsdbEkMT27vbevt6vbK/dwN3s2eyJG4niyeKYPpiRGJHAi8Du4O7Km8qzdLOMIYy+g76WN5bCg8KlXKW0d7Tmz+bXtNeVRJW5gbnUq9TMm8yVJZXTsNOdT52gP6CqXKqYLZixaLHCmcKqaqq8i7zHocejXqOROpGlTaW8eLyxY7GpV6muca7rpx45AAAKMklEQVR4nN3diXraOBAAYDS2sbkJlw0mhADhCDQkhTbNJm3f/62WkLbZ1JItySNZ2nkB9H/CujUqEX3hBa1ur/cpqlU9jb9a0vVD5Wb0ctloOI7TgLvrqFnW9cOahPV4OnYBSm8Bjjuexn09P61F2Nr/vPzD+4WE0WrT1PHjGoSt6dL/y/dm9J86GozKhcPJrZvk/UKO7j8pNyoW1l7aTN/ZWFpMArVFUCoMbmh/z7//rJVeVWUh1Am9q96lk8F7Mzp306a6HlKZ8OrbIrP+3utx/K2lqiCKhLX9fYnXdzaWLnY1NUVRIixvQl/Edza6YVdJm6NCGF/PRH1n4yyMFHyO+ML6vC3Be4vZC/7niC7c/T0+E6vHSg+7QLjC8vqhkcP3SmzcRbjdI6bQa20r+Xxno389xPwcEYW13Ti/72xcYI7I8YQD8R6CSXSXXbRqxBI2t20s39k4m2O1qjhCb3eROoWQIJZuOzgLHSjC4Xdk39nofx5iFA5BWO9VuOYQwuH4vboBwiB6UOM7Gx+i3GPVnEJvOEFrQWkB/jZv55hPeNVZqPSdjYvpVWFCr7tU0MIkiKfOMU+rmkO4PqJ2gSnG2XJdgDC4GQnN4vMZRzfSLY6kMNjxrTKhhXO5k5xySAnrg+c8k0CpAHiOpHY6JIT96Ki0h2Aa/VCmdxQWBhHGJFDSWNmKT48FheXBSlMDyjC2t6KrVUJCbxC29TWgdGJpcR0rEw6eNXYQKcbZj4EKYdA5aG8/WQFw6HC3qzxCL2hGYcUxxfca4PjHqBnwfJJZwnKttd5f35X09u884ZTurvfDVj1LyRZWa8N4s/8SLipgVPW9x+mrqYx/ftkP4mGdPTZnCPvd3vbrffsVZ6budwA4JX9x/3PSiRlIujBezlwAw3Hv8VpSfxzSexGqcNO2BvceAO0Or3BQ6LBFPmC04xM27+0EnogXlPXHpLDc84suqXS4vWRzkxSuL2ytwlMljpPLHQlhuVN0MXNF8mxOQlgL7a3CUyV+Tpzo+L8Jl9nC/spqYZjY6UgIg4l5g2z+cLaJWVWypflitfAxsVaVEHrfrBZ+SXSIyf5wb/N36HxLTBcpwqJLmSdgn/AkhRt7B22n4BEOKkWXMkf4Gw5hNCq6mDnCjziE8cHipmbEI1wr37hWF9BOrmQkhcP/++yJtJYWC++Tk/yksPbVYuEyeRouKbR5cgFfkwf+k8Jga7EwObWgrUQ9Fl3OHDHhWYkiHbfockqHO03u01CEO3sHpj5l1Zsi7No7bPMpi94Uoa2L+qeYJQfeNGGMdORef8AiOSylCYf27lvcUk74UYS1J2uFS8pRVIqw/NNa4VfKCQ3a/qG1gxpYUTQ04cTaLn/LKZza2iH6tKt9NGF3VnRRJWNE28inCeN/LP0Q25QOnyqs3dophH9o14howrKlXT7c0o7zUc/TLIsuq1zAknbGjSp8KbqsknGkYajCT5Z2iHNu4aDookoG96kvMrS0y6fMnRjCqp1bFyPqDXD66csHG4VwoB4Xpgu/27iXD89UC13Ys1HovAgIo0bRxZUIh9qUMoRVG4UN+uV2xkn2wi5v5QiHTmEIn+0TwqWQcG5fUwPfhYQD+4TOVEjYsm/sDYxLe6w7M3fWfYgVRtYehrD6wzYhPDDuCDOEnnWjGmcudO/pNKopusSiQTmVmC5s2XZ+r8LKusQSNi3r82HMSg/GEgZbuz5EZ8W6GMy8Q7q3TJg8/pwljOz6ECkHS7OEQ6t282HBzGDDFNatOt5GO9CWJfSsOhoFj8zL3Ozb6hubdhFpR4UyhTYdOoEFOxsIWxhYdCQDntiJpFOyRvTs+RDdCZuRIrRoO596TT1bWLPmQ4TblGSnablNwqJLzh1PKYo04bTognNHWorsNOHQlg9xlpY5Kk3oWTI0hUVairPUHEM3dsygHOoJBS5hbImwKy0kdswRITW9abrQir1geEg1pAut+Js6KQOaTGH/0oLWtJKeEjtd6L2YX4lwTM8ynJGRzobTUbRDpfzCK+P3oOAuIxl2htD8hWFnlZGXNitvYmz8NJi5UMopbBl+sxvGWQ8oZOa+fDRc+JiVWDgzf+lA6nUqbTHKaEk5hFdG3/OiXcAXFZq95OZOMtPQZgsjg/NkQDs7ZzJHHmGDcyzAU3YmYQ7hztxT32nrpALCvrHLNTDmeGmHJ9v13Fgh9YKFhHBoamvq87zrxZWT3dCTJ4yj6zJCQxczGlmDbn5h2cgbJnDH9YQQ38sBXROFjLP5csK6gZdo4MD3DCSf0OsYKJzyvXPF+b7F0LjBKbQ53w7kFFaNmwgD76vzvG+UxIZVIrS5ugoBYXVbtOljAPO0pazQsGkiz8RQVEhWRas+xIr71Sd+YSz/oDh+8FehyHtPBiVrh9R9bWnh0Jw8br7Ai48ib3YZs9XGuA+bX9g3ZSbsijwTLPSynCFXhZy0I1D5hHUj5olwEHrpWex1QCOSRvp7oRcQhYSkfiy+EilPWCAKSVT4ThT/kFtOGBQ+AHe3gq+tCgrJuuAFcFrGblwhKfi9K2rSOVxhUGhCc1gKP0IuLCTRqDgijMTekZUTFplvwUm5V4EoDAqb7cNCx6vVp4iKamwqgl2htLBcUApXyD6WgCQkzUIOSjk/+JbxMYQkLmDwJtOOyguLuGDqdmT+o7JC0r/WTgzZVwxVCLVf9RYfj+YVko3eSnQzT+ihC/UObRyecyXYQu+gj+gchAfcCEJS13YZAy4lW5mcQrLW1CvK9oT5hV5Xy0QKRpI9YX4hCbRk4HfnvJuh+EJSC9UT3VBqOIok1HBZAS54juepEypvbWAmO5bBEpLYV0kEl3+zV5WQDBQSweU45qxcSHbK+gxwGfksNQu9qSIiuD35wRqmkAQ9NX9Uf5KrI/wVGELS36pYffNXYttojEARkkDFcaIQowaxhMQ7Yk+l4DPCN/gaSEJCXnA/RVbeY/FAE5IXzCGqe8wznfgQeMLy3MWqRnBXWTdD+QNPSPoTJCL4lCdhpQNRSPo4XT+MUPrB34EpJNUOAhFGU4k9NHagCgnZ5H5y4DTYRmtkzoEsJOucC3BQybPqRAtsIRmOcwmlF++ZgS4kraN0kwruMeeSBSXwhaQ2kWxvYLTNsfLLCgVCEuyl3kyGWQezl/gdKoTEixfiA3HnECGNtT+GEuHpn/og+hZP4yHfsigzFAmJdyPU3pxGori94HuoEhLSXQgIF6lp83KFOiEZhpxtKrghei/4HgqFpN7halNhNlXQSfwJlcJTm/o5mwgXkapP8BxKhYQ0JxkLjae5IP4w5kMoFpLqILVrdBYbvNk8PVQLT/PiObMawb1W+QW+hXohIfE9tW8E9yL3xhJH6BCSYELpG6Gdb/eaN7QIT9X4d98Io1DmOKxEaBKS+u6i9G6E0v0OZVOCI3QJideaHpw3I8Bh2lLaB/43tAkJKbcmlw3HcRqXvZaSeRI9NApP9diPezef4kBb/b3Gv8/6vG/rtpSMAAAAAElFTkSuQmCC")
+            .attr("x", 130)
+            .attr("y", 50)
+            .attr("width", 50)
+            .attr("height", 50)
+
+        var defenseLegendText = d3.select("#defenseLegendText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 180)
+            .attr("y", 80)
+            .attr("fill", "black")
+            .text("Defense")
+
+        var speedLegendSymbol = d3.select("#speedLegendSymbol")
+            .append("image")
+            .attr("xlink:href","data:image/png;base64,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")
+            .attr("x", 130)
+            .attr("y", 110)
+            .attr("width", 50)
+            .attr("height", 50)
+
+        var speedLegendText = d3.select("#speedLegendText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 180)
+            .attr("y", 140)
+            .attr("fill", "black")
+            .text("Speed")
+
+        var interactionText = d3.select("#interactionText")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 0)
+            .attr("y", 190)
+            .attr("fill", "black")
+            .text("How to interact with the visualization:")
+
+        var interactionStep1Text = d3.select("#interactionStep1Text")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 0)
+            .attr("y", 220)
+            .attr("fill", "black")
+            .text("1: Press the Heart, Sword, Shield, or Lightning")
+
+        var interactionStep1_1Text = d3.select("#interactionStep1_1Text")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 0)
+            .attr("y", 240)
+            .attr("fill", "black")
+            .text("Bolt above the pokemon to view the stat number")
+
+        var interactionStep2Text = d3.select("#interactionStep2Text")
+            .append("text")
+            .attr("height", 20)
+            .attr("width", 55)
+            .attr("x", 0)
+            .attr("y", 270)
+            .attr("fill", "black")
+            .text("2: To toggle off the stat number reclick the icon")
+
+    }
+
+</script>
+
+</html>
